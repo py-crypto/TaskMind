@@ -1,6 +1,5 @@
 import streamlit as st
-import asyncio
-from main import results
+from main import results  # your main.py logic
 
 st.set_page_config(page_title="Jarvis AI Assistant", layout="wide")
 st.title("🤖 Jarvis AI Assistant")
@@ -16,9 +15,10 @@ user_input = st.text_input("You:", key="input")
 if user_input:
     st.session_state.history.append(("user", user_input))
 
-    # Run async logic from main.py, pass both user and prompt
-    response = asyncio.run(results("Broddy", user_input))  # <-- FIXED LINE
+    # Correct synchronous call to results()
+    response = results("Broddy", user_input)
 
+    # Handle different response types
     if isinstance(response, dict) and response["type"] == "text":
         st.session_state.history.append(("bot", response["content"]))
     elif isinstance(response, dict) and response["type"] == "image":
