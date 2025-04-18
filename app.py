@@ -1,33 +1,41 @@
 import streamlit as st
 import asyncio
-from main import results  # This uses your main.py's logic
+from main import results  # Your main.py logic
 
-st.set_page_config(page_title="Jarvis AI Assistant", layout="wide")
-st.title("🤖 Jarvis AI Assistant")
+st.set_page_config(page_title="TaskMind AI Assistant", layout="wide")
+st.title("🤖 TaskMind AI Assistant")
 
-# For storing chat history in Streamlit session
-if "history" not in st.session_state:
-    st.session_state.history = []
+# User input for name
+username = st.text_input("Your name:", value="Broddy")
 
-# Input
+# Initialize chat history for each unique user
+if f"history_{username}" not in st.session_state:
+    st.session_state[f"history_{username}"] = []
+
+# Input box for chat
 user_input = st.text_input("You:", key="input")
 
-# Process Input
+# Process input when user submits
 if user_input:
-    st.session_state.history.append(("user", user_input))
+    st.session_state[f"history_{username}"].append(("user", user_input))
 
-    # Run async logic from main.py
-    response = asyncio.run(results(user_input))
+    # Call results with both user and prompt
+    response = asyncio.run(results(username, user_input))
 
-    if isinstance(response, str):
-        st.session_state.history.append(("bot", response))
-    elif isinstance(response, bytes):  # image
-        st.session_state.history.append(("bot", "[image]"))
-        st.image(response, caption="Generated Image")
+    # Handle different response types
+    if isinstance(response, dict) and response["type"] == "text":
+        st.session_state[f"history_{username}"].append(("bot", response["content"]))
+    elif isinstance(response, dict) and response["type"] == "image":
+        st.session_state[f"history_{username}"].append(("bot", "[image]"))
+        st.image(response["path"], caption="Generated Image")
+    elif isinstance(response, dict) and response["type"] == "map":
+        map_link = f"[🗺️ View Map of {user_input}]({response['url']})"
+        st.session_state[f"history_{username}"].append(("bot", map_link))
+        st.markdown(map_link, unsafe_allow_html=True)
     else:
-        st.session_state.history.append(("bot", str(response)))
+        st.session_state[f"history_{username}"].append(("bot", str(response)))
 
-# Display chat history
-for sender, message in st.session_state.history:
+# Display the chat history
+for sender, message in st.session_state[f"history_{username}"]:
     with st.chat_message(sender):
         st.markdown(message)
