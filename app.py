@@ -1,8 +1,8 @@
 import streamlit as st
 from main import results  # your main.py logic
 
-st.set_page_config(page_title="Jarvis AI Assistant", layout="wide")
-st.title("🤖 Jarvis AI Assistant")
+st.set_page_config(page_title="TaskMind AI Assistant", layout="wide")
+st.title("🤖 TaskMind AI Assistant")
 
 # For storing chat history in Streamlit session
 if "history" not in st.session_state:
